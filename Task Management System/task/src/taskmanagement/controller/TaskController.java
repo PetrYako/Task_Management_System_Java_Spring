@@ -19,8 +19,9 @@ public class TaskController {
     private TaskService taskService;
 
     @GetMapping
-    public ResponseEntity<List<String>> getTasks() {
-        return ResponseEntity.status(HttpStatus.OK).build();
+    public ResponseEntity<List<TaskResponse>> getTasks(@RequestParam(required = false) String author) {
+        List<TaskResponse> tasks = taskService.getTasks(author);
+        return ResponseEntity.status(HttpStatus.OK).body(tasks);
     }
 
     @PostMapping
