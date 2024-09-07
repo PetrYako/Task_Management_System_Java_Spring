@@ -6,6 +6,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import taskmanagement.controller.dto.AccountRequest;
 import taskmanagement.model.entity.User;
@@ -14,6 +15,7 @@ import taskmanagement.model.service.UserService;
 import java.util.regex.Pattern;
 
 @RestController
+@RequestMapping("/api/accounts")
 public class AccountController {
 
     private static final Pattern EMAIL_REGEX = Pattern.compile("^[a-zA-Z0-9_+&*-]+(?:\\.[a-zA-Z0-9_+&*-]+)*@(?:[a-zA-Z0-9-]+\\.)+[a-zA-Z]{2,7}$");
@@ -21,7 +23,7 @@ public class AccountController {
     @Autowired
     private UserService userService;
 
-    @PostMapping("/api/accounts")
+    @PostMapping
     public ResponseEntity<String> createAccount(@RequestBody @Valid AccountRequest accountRequest) {
         if (accountRequest.getEmail() == null || accountRequest.getEmail().isBlank() ||
                 !EMAIL_REGEX.matcher(accountRequest.getEmail()).matches()) {
