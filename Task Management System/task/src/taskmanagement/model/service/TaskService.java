@@ -22,10 +22,14 @@ public class TaskService {
     @Autowired
     private UserRepository userRepository;
 
-    public List<TaskResponse> getTasks(String author) {
+    public List<TaskResponse> getTasks(String author, String assignee) {
         List<Task> tasks;
-        if (author != null && !author.isBlank()) {
-            tasks = taskRepository.findByAuthorEmail(author.toLowerCase(), Sort.by(Sort.Direction.DESC, "id"));
+        if (author != null && !author.isBlank() && assignee != null && !assignee.isBlank()) {
+            tasks = taskRepository.findByAuthorEmailAndAssigneeAllIgnoreCase(author, assignee, Sort.by(Sort.Direction.DESC, "id"));
+        } else if (author != null && !author.isBlank()) {
+            tasks = taskRepository.findByAuthorEmailIgnoreCase(author, Sort.by(Sort.Direction.DESC, "id"));
+        } else if (assignee != null && !assignee.isBlank()) {
+            tasks = taskRepository.findByAssigneeIgnoreCase(assignee, Sort.by(Sort.Direction.DESC, "id"));
         } else {
             tasks = taskRepository.findAll(Sort.by(Sort.Direction.DESC, "id"));
         }
@@ -44,13 +48,48 @@ public class TaskService {
         return mapToTaskResponse(savedTask);
     }
 
+    public TaskResponse assignTask(Long taskId, String assignee, String currentUserEmail) {
+        Task task = taskRepository.findById(taskId)
+                .orElseThrow(() -> new IllegalArgumentException("Task not found"));
+
+        if (!task.getAuthor().getEmail().equals(currentUserEmail)) {
+            throw new IllegalStateException("Only the author can assign the task");
+        }
+
+        if (assignee.equals("none")) {
+            task.setAssignee("none");
+        } else {
+            User assigneeUser = userRepository.findByEmail(assignee.toLowerCase())
+                    .orElseThrow(() -> new IllegalArgumentException("Assignee not found"));
+            task.setAssignee(assigneeUser.getEmail());
+        }
+
+        Task updatedTask = taskRepository.save(task);
+        return mapToTaskResponse(updatedTask);
+    }
+
+    public TaskResponse updateTaskStatus(Long taskId, String newStatus, String currentUserEmail) {
+        Task task = taskRepository.findById(taskId)
+                .orElseThrow(() -> new IllegalArgumentException("Task not found"));
+
+        if (!task.getAuthor().getEmail().equals(currentUserEmail) &&
+                !task.getAssignee().equals(currentUserEmail)) {
+            throw new IllegalStateException("Only the author or assignee can update the task status");
+        }
+
+        task.setStatus(Task.TaskStatus.valueOf(newStatus));
+        Task updatedTask = taskRepository.save(task);
+        return mapToTaskResponse(updatedTask);
+    }
+
     private TaskResponse mapToTaskResponse(Task task) {
         return new TaskResponse(
                 String.valueOf(task.getId()),
                 task.getTitle(),
                 task.getDescription(),
-                task.getStatus(),
-                task.getAuthor().getEmail().toLowerCase()
+                task.getStatus().name(),
+                task.getAuthor().getEmail().toLowerCase(),
+                task.getAssignee()
         );
     }
 }

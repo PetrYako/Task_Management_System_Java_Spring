@@ -8,5 +8,7 @@ import taskmanagement.model.entity.Task;
 import java.util.List;
 
 public interface TaskRepository extends JpaRepository<Task, Long>, PagingAndSortingRepository<Task, Long> {
-    List<Task> findByAuthorEmail(String email, Sort sort);
+    List<Task> findByAuthorEmailIgnoreCase(String email, Sort sort);
+    List<Task> findByAssigneeIgnoreCase(String assignee, Sort sort);
+    List<Task> findByAuthorEmailAndAssigneeAllIgnoreCase(String authorEmail, String assignee, Sort sort);
 }

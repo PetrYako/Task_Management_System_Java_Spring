@@ -33,7 +33,7 @@ public class SecurityConfig {
             .oauth2ResourceServer(OAuth2ResourceServerConfigurer::jwt)
             .authorizeHttpRequests((authz) -> authz
                     .requestMatchers("/api/auth/token").authenticated()
-                    .requestMatchers("/api/tasks").authenticated()
+                    .requestMatchers("/api/tasks/**").authenticated()
                     .requestMatchers("/api/accounts").permitAll()
                     .requestMatchers("/error").permitAll() // expose the /error endpoint
                     .requestMatchers("/actuator/shutdown").permitAll() // required for tests

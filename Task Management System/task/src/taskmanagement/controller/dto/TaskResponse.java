@@ -6,13 +6,15 @@ public class TaskResponse {
     private String description;
     private String status;
     private String author;
+    private String assignee;
 
-    public TaskResponse(String id, String title, String description, String status, String author) {
+    public TaskResponse(String id, String title, String description, String status, String author, String assignee) {
         this.id = id;
         this.title = title;
         this.description = description;
         this.status = status;
         this.author = author;
+        this.assignee = assignee;
     }
 
     public String getId() {
@@ -34,4 +36,6 @@ public class TaskResponse {
     public String getAuthor() {
         return author;
     }
+
+    public String getAssignee() { return assignee; }
 }

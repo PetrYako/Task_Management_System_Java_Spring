@@ -17,11 +17,15 @@ public class Task {
     private String description;
 
     @Column(nullable = false)
-    private String status;
+    @Enumerated(EnumType.STRING)
+    private TaskStatus status;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "author_id", nullable = false)
     private User author;
+
+    @Column(nullable = false)
+    private String assignee;
 
     public Task() {
     }
@@ -29,8 +33,9 @@ public class Task {
     public Task(String title, String description, User author) {
         this.title = title;
         this.description = description;
-        this.status = "CREATED";
+        this.status = TaskStatus.CREATED;
         this.author = author;
+        this.assignee = "none";
     }
 
     public Long getId() {
@@ -53,11 +58,11 @@ public class Task {
         this.description = description;
     }
 
-    public String getStatus() {
+    public TaskStatus getStatus() {
         return status;
     }
 
-    public void setStatus(String status) {
+    public void setStatus(TaskStatus status) {
         this.status = status;
     }
 
@@ -67,5 +72,17 @@ public class Task {
 
     public void setAuthor(User author) {
         this.author = author;
+    }
+
+    public String getAssignee() {
+        return assignee;
+    }
+
+    public void setAssignee(String assignee) {
+        this.assignee = assignee;
+    }
+
+    public enum TaskStatus {
+        CREATED, IN_PROGRESS, COMPLETED
     }
 }
