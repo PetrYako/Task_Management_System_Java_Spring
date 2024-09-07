@@ -5,10 +5,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
-import taskmanagement.controller.dto.AssignRequest;
-import taskmanagement.controller.dto.StatusUpdateRequest;
-import taskmanagement.controller.dto.TaskRequest;
-import taskmanagement.controller.dto.TaskResponse;
+import taskmanagement.controller.dto.*;
 import taskmanagement.model.service.TaskService;
 
 import java.util.List;
@@ -32,18 +29,18 @@ public class TaskController {
     }
 
     @PostMapping
-    public ResponseEntity<TaskResponse> createTask(@RequestBody TaskRequest taskRequest, Authentication authentication) {
+    public ResponseEntity<TaskWithoutTotalCommentsResponse> createTask(@RequestBody TaskRequest taskRequest, Authentication authentication) {
         if (taskRequest.getTitle() == null || taskRequest.getTitle().isBlank() ||
                 taskRequest.getDescription() == null || taskRequest.getDescription().isBlank()) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
         }
 
-        TaskResponse taskResponse = taskService.createTask(taskRequest, authentication.getName());
+        TaskWithoutTotalCommentsResponse taskResponse = taskService.createTask(taskRequest, authentication.getName());
         return ResponseEntity.status(HttpStatus.OK).body(taskResponse);
     }
 
     @PutMapping("/{taskId}/assign")
-    public ResponseEntity<TaskResponse> assignTask(@PathVariable Long taskId,
+    public ResponseEntity<TaskWithoutTotalCommentsResponse> assignTask(@PathVariable Long taskId,
                                                    @RequestBody AssignRequest assignRequest,
                                                    Authentication authentication) {
         String assignee = assignRequest.getAssignee();
@@ -52,7 +49,7 @@ public class TaskController {
         }
 
         try {
-            TaskResponse taskResponse = taskService.assignTask(taskId, assignee, authentication.getName());
+            TaskWithoutTotalCommentsResponse taskResponse = taskService.assignTask(taskId, assignee, authentication.getName());
             return ResponseEntity.ok(taskResponse);
         } catch (IllegalArgumentException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
@@ -62,7 +59,7 @@ public class TaskController {
     }
 
     @PutMapping("/{taskId}/status")
-    public ResponseEntity<TaskResponse> updateTaskStatus(@PathVariable Long taskId,
+    public ResponseEntity<TaskWithoutTotalCommentsResponse> updateTaskStatus(@PathVariable Long taskId,
                                                          @RequestBody StatusUpdateRequest statusUpdateRequest,
                                                          Authentication authentication) {
         String newStatus = statusUpdateRequest.getStatus();
@@ -71,12 +68,38 @@ public class TaskController {
         }
 
         try {
-            TaskResponse taskResponse = taskService.updateTaskStatus(taskId, newStatus, authentication.getName());
+            TaskWithoutTotalCommentsResponse taskResponse = taskService.updateTaskStatus(taskId, newStatus, authentication.getName());
             return ResponseEntity.ok(taskResponse);
         } catch (IllegalArgumentException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         } catch (IllegalStateException e) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
+    }
+
+    @PostMapping("/{taskId}/comments")
+    public ResponseEntity<Void> addComment(@PathVariable Long taskId,
+                                           @RequestBody CommentRequest commentRequest,
+                                           Authentication authentication) {
+        if (commentRequest.getText() == null || commentRequest.getText().isBlank()) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+        }
+
+        try {
+            taskService.addComment(taskId, commentRequest.getText(), authentication.getName());
+            return ResponseEntity.ok().build();
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
+    }
+
+    @GetMapping("/{taskId}/comments")
+    public ResponseEntity<List<CommentResponse>> getComments(@PathVariable Long taskId) {
+        try {
+            List<CommentResponse> comments = taskService.getComments(taskId);
+            return ResponseEntity.ok(comments);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }
     }
 

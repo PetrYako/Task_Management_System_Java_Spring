@@ -2,6 +2,9 @@ package taskmanagement.model.entity;
 
 import jakarta.persistence.*;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Entity
 @Table(name = "tasks")
 public class Task {
@@ -26,6 +29,9 @@ public class Task {
 
     @Column(nullable = false)
     private String assignee;
+
+    @OneToMany(mappedBy = "task", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Comment> comments = new ArrayList<>();
 
     public Task() {
     }
@@ -80,6 +86,18 @@ public class Task {
 
     public void setAssignee(String assignee) {
         this.assignee = assignee;
+    }
+
+    public List<Comment> getComments() {
+        return comments;
+    }
+
+    public void setComments(List<Comment> comments) {
+        this.comments = comments;
+    }
+
+    public int getTotalComments() {
+        return comments.size();
     }
 
     public enum TaskStatus {
