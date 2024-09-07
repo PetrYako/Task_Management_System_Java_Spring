@@ -6,6 +6,7 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import taskmanagement.controller.dto.AccountRequest;
 import taskmanagement.model.entity.User;
 import taskmanagement.model.repository.UserRepository;
 
@@ -25,9 +26,9 @@ public class UserService implements UserDetailsService {
         return userRepository.findByEmail(email.toLowerCase());
     }
 
-    public User saveUser(User user) {
-        user.setPassword(passwordEncoder.encode(user.getPassword()));
-        return userRepository.save(user);
+    public void saveUser(AccountRequest accountRequest) {
+        User user = new User(accountRequest.getEmail(), passwordEncoder.encode(accountRequest.getPassword()));
+        userRepository.save(user);
     }
 
     @Override

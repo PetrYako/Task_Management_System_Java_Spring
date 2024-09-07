@@ -38,8 +38,7 @@ public class AccountController {
             return ResponseEntity.status(HttpStatus.CONFLICT).build();
         }
 
-        User user = new User(normalizedEmail, accountRequest.getPassword());
-        userService.saveUser(user);
+        userService.saveUser(accountRequest);
 
         return ResponseEntity.status(HttpStatus.OK).build();
     }
